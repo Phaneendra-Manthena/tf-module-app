@@ -14,11 +14,11 @@ resource "aws_iam_role" "role" {
       },
     ]
   })
-    tags = merge(
-      local.common_tags,
-      { Name = "${var.env}-${var.component}-role" }
-    )
-  }
+  tags = merge(
+    local.common_tags,
+    { Name = "${var.env}-${var.component}-role" }
+  )
+}
 resource "aws_iam_instance_profile" "test_profile" {
   name = "${var.env}-${var.component}-role"
   role = aws_iam_role.role.name
@@ -31,28 +31,28 @@ resource "aws_iam_policy" "policy" {
 
 
   policy = jsonencode({
-    "Version": "2012-10-17",
-    "Statement": [
+    "Version" : "2012-10-17",
+    "Statement" : [
       {
-        "Sid": "VisualEditor0",
-        "Effect": "Allow",
-        "Action": [
+        "Sid" : "VisualEditor0",
+        "Effect" : "Allow",
+        "Action" : [
           "ssm:GetParameterHistory",
           "ssm:GetParametersByPath",
           "ssm:GetParameters",
           "ssm:GetParameter"
         ],
-        "Resource": [
+        "Resource" : [
           "arn:aws:ssm:us-east-1:347554562486:parameter/${var.env}.${var.component}*",
           "arn:aws:ssm:us-east-1:347554562486:parameter/nexus*"
         ]
 
       },
       {
-        "Sid": "VisualEditor1",
-        "Effect": "Allow",
-        "Action": "ssm:DescribeParameters",
-        "Resource": "*"
+        "Sid" : "VisualEditor1",
+        "Effect" : "Allow",
+        "Action" : "ssm:DescribeParameters",
+        "Resource" : "*"
       }
     ]
   })
@@ -69,27 +69,27 @@ resource "aws_security_group" "main" {
   vpc_id      = var.vpc_id
 
   ingress {
-    description      = "HTTP"
-    from_port        = var.app_port
-    to_port          = var.app_port
-    protocol         = "tcp"
-    cidr_blocks      = var.allow_cidr
+    description = "HTTP"
+    from_port   = var.app_port
+    to_port     = var.app_port
+    protocol    = "tcp"
+    cidr_blocks = var.allow_cidr
 
   }
   ingress {
-    description      = "SSH"
-    from_port        = 22
-    to_port          = 22
-    protocol         = "tcp"
-    cidr_blocks      = var.bastion_cidr
+    description = "SSH"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = var.bastion_cidr
 
   }
 
   egress {
-    from_port        = 0
-    to_port          = 0
-    protocol         = "-1"
-    cidr_blocks      = ["0.0.0.0/0"]
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
 
   }
   tags = merge(
@@ -99,14 +99,14 @@ resource "aws_security_group" "main" {
 }
 
 resource "aws_launch_template" "main" {
-  name_prefix   = "${var.env}-${var.component}-template"
-  image_id      = data.aws_ami.centos8.id
-  instance_type = var.instance_type
+  name_prefix            = "${var.env}-${var.component}-template"
+  image_id               = data.aws_ami.centos8.id
+  instance_type          = var.instance_type
   vpc_security_group_ids = [aws_security_group.main.id]
   iam_instance_profile {
     arn = aws_iam_instance_profile.test_profile.arn
   }
-  user_data = base64encode("")
+  user_data = base64encode(templatefile("${path.module}/user-data.sh", { component = var.component, env = var.env }))
 
 }
 resource "aws_lb_target_group" "target_group" {
