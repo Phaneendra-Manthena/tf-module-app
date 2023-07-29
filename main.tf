@@ -106,7 +106,7 @@ resource "aws_launch_template" "main" {
   iam_instance_profile {
     arn = aws_iam_instance_profile.test_profile.arn
   }
-  user_data = base64encode(templatefile("${path.module}/user-data.sh", { component = var.component, env = var.env }))
+  user_data = base64encode(templatefile("${path.module}/user_data.sh", { component = var.component, env = var.env }))
 
 }
 resource "aws_lb_target_group" "target_group" {
