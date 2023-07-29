@@ -4,3 +4,7 @@ variable "vpc_id" {}
 variable "allow_cidr" {}
 variable "component" {}
 variable "app_port" {}
+variable "min_size" {}
+variable "max_size" {}
+variable "desired_capacity" {}
+variable "instance_type" {}

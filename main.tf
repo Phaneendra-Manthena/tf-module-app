@@ -24,3 +24,68 @@ resource "aws_security_group" "main" {
     { Name = "${var.env}-${var.component}-security-group" }
   )
 }
+
+resource "aws_launch_template" "main" {
+  name_prefix   = "${var.env}-${var.component}-template"
+  image_id      = data.aws_ami.centos8.id
+  instance_type = var.instance_type
+}
+resource "aws_lb_target_group" "target_group" {
+  name     = "${var.component}-${var.env}"
+  port     = var.app_port
+  protocol = "HTTP"
+  vpc_id   = var.vpc_id
+
+  health_check {
+    enabled             = true
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+    interval            = 5
+    path                = "/health"
+    protocol            = "HTTP"
+    timeout             = 2
+  }
+  deregistration_delay = 10
+
+}
+
+resource "aws_autoscaling_group" "asg" {
+  name                      = "${var.env}-${var.component}-asg"
+  max_size                  = var.min_size
+  min_size                  = var.max_size
+  desired_capacity          = var.desired_capacity
+#  health_check_grace_period = 300
+#  health_check_type         = "ELB"
+  force_delete              = true
+  vpc_zone_identifier       = var.subnet_ids
+  target_group_arns = [aws_lb_target_group.target_group.arn]
+
+  launch_template {
+    id      = aws_launch_template.main.id
+    version = "$Latest"
+  }
+
+  dynamic "tag" {
+    for_each = local.all_tags
+    content {
+      key                 = tag.value.key
+      value               = tag.value.value
+      propagate_at_launch = true
+    }
+  }
+}
+
+#  initial_lifecycle_hook {
+#    name                 = "foobar"
+#    default_result       = "CONTINUE"
+#    heartbeat_timeout    = 2000
+#    lifecycle_transition = "autoscaling:EC2_INSTANCE_LAUNCHING"
+#
+#    notification_metadata = jsonencode({
+#      foo = "bar"
+#    })
+#
+#    notification_target_arn = "arn:aws:sqs:us-east-1:444455556666:queue1*"
+#    role_arn                = "arn:aws:iam::123456789012:role/S3Access"
+#  }
+
