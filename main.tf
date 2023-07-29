@@ -42,7 +42,11 @@ resource "aws_iam_policy" "policy" {
           "ssm:GetParameters",
           "ssm:GetParameter"
         ],
-        "Resource": "arn:aws:ssm:us-east-1:347554562486:parameter/${var.env}.${var.component}*"
+        "Resource": [
+          "arn:aws:ssm:us-east-1:347554562486:parameter/${var.env}.${var.component}*"
+          "arn:aws:ssm:us-east-1:347554562486:parameter/nexus*"
+        ]
+
       },
       {
         "Sid": "VisualEditor1",
