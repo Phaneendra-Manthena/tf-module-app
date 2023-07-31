@@ -174,3 +174,47 @@ resource "aws_autoscaling_group" "asg" {
 #    role_arn                = "arn:aws:iam::123456789012:role/S3Access"
 #  }
 
+
+
+
+// THis is for backend components
+resource "aws_lb_listener_rule" "backend_rule" {
+  count        = var.listener_priority != 0 ? 1 : 0
+  listener_arn = var.listener
+  priority     = var.listener_priority
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.target_group.arn
+  }
+
+  condition {
+    host_header {
+      values = ["${var.component}-${var.env}.phanidevops.cloud"]
+    }
+  }
+}
+// This is only for frontend
+resource "aws_lb_listener" "frontend" {
+  count             = var.listener_priority == 0 ? 1 : 0
+  load_balancer_arn = var.alb_arn
+  port              = "80"
+  protocol          = "HTTP"
+#  ssl_policy        = "ELBSecurityPolicy-2016-08"
+#  certificate_arn   = "arn:aws:acm:us-east-1:633788536644:certificate/e0de402e-a390-4600-a292-bf3b5b926201"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.target_group.arn
+  }
+}
+
+
+resource "aws_route53_record" "app" {
+  zone_id = "Z0366464237Z7LZLZPKFA"
+  name    = "${var.component}-${var.env}.phanidevops.cloud"
+  type    = "CNAME"
+  ttl     = 30
+  records = [var.alb]
+}
+
