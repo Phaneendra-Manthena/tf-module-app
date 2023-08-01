@@ -49,7 +49,7 @@ resource "aws_iam_policy" "policy" {
           "arn:aws:ssm:us-east-1:347554562486:parameter/nexus${var.env}.elasticache*",
           "arn:aws:ssm:us-east-1:347554562486:parameter/nexus${var.env}.rds*",
           "arn:aws:ssm:us-east-1:347554562486:parameter/nexus${var.env}.rabbitmq*",
-          "arn:aws:ssm:us-east-1:633788536644:parameter/${var.env}.ssh*"
+          "arn:aws:ssm:us-east-1:347554562486:parameter/${var.env}.ssh*"
         ]
 
       },
