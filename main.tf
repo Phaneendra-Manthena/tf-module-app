@@ -211,7 +211,7 @@ resource "aws_lb_listener" "frontend" {
 
 
 resource "aws_route53_record" "app" {
-  zone_id = "Z07612512EGUKWGDM5BZA"
+  zone_id = "Z03149483UPYYQRH6S5VY"
   name    = "${var.component}-${var.env}.phanidevops.cloud"
   type    = "CNAME"
   ttl     = 30
