@@ -135,31 +135,31 @@ resource "aws_lb_target_group" "target_group" {
 
 }
 
-#resource "aws_autoscaling_group" "asg" {
-#  name                      = "${var.env}-${var.component}-asg"
-#  max_size                  = var.min_size
-#  min_size                  = var.max_size
-#  desired_capacity          = var.desired_capacity
-##  health_check_grace_period = 300
-##  health_check_type         = "ELB"
-#  force_delete              = true
-#  vpc_zone_identifier       = var.subnet_ids
-#  target_group_arns = [aws_lb_target_group.target_group.arn]
-#
-#  launch_template {
-#    id      = aws_launch_template.main.id
-#    version = "$Latest"
-#  }
-#
-#  dynamic "tag" {
-#    for_each = local.all_tags
-#    content {
-#      key                 = tag.value.key
-#      value               = tag.value.value
-#      propagate_at_launch = true
-#    }
-#  }
-#}
+resource "aws_autoscaling_group" "asg" {
+  name                      = "${var.env}-${var.component}-asg"
+  max_size                  = var.min_size
+  min_size                  = var.max_size
+  desired_capacity          = var.desired_capacity
+#  health_check_grace_period = 300
+#  health_check_type         = "ELB"
+  force_delete              = true
+  vpc_zone_identifier       = var.subnet_ids
+  target_group_arns = [aws_lb_target_group.target_group.arn]
+
+  launch_template {
+    id      = aws_launch_template.main.id
+    version = "$Latest"
+  }
+
+  dynamic "tag" {
+    for_each = local.all_tags
+    content {
+      key                 = tag.value.key
+      value               = tag.value.value
+      propagate_at_launch = true
+    }
+  }
+}
 
 #  initial_lifecycle_hook {
 #    name                 = "foobar"
